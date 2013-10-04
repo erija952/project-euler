@@ -1,0 +1,40 @@
+-module(pr3).
+-compile(export_all).
+-include_lib("eunit/include/eunit.hrl").
+
+%%The prime factors of 13195 are 5, 7, 13 and 29.
+%%What is the largest prime factor of the number 600851475143 ?
+
+pr3_test_() ->
+    [?_assert(findPrimes(13195) == 29),
+     ?_assert(findPrimes(13195,3,[]) == [29, 13, 7, 5]),
+     ?_assert(isPrime(10) == false),
+     ?_assert(isPrime(13) == true),
+     ?_assert(isPrime(661) == true),
+     ?_assert(findMax([10,23,3410]) == 3410)
+     ].
+
+findPrimes(N)-> 
+    PrimeList = findPrimes(N, 3, []),
+    io:fwrite("\n Max primefactor: \n "),
+     findMax(PrimeList).
+findPrimes(N,Divisor, List) when N rem Divisor == 0, Divisor < N-> 
+case isPrime(Divisor) of
+     true -> io:fwrite("Found divisor ~w\n ", [Divisor]), findPrimes(N, Divisor + 2, [Divisor | List]);
+     false -> findPrimes(N, Divisor + 2, List)
+end;
+findPrimes(N,Divisor, List) when Divisor >= N-> List;
+findPrimes(N,Divisor, List) -> findPrimes(N, Divisor +1, List).
+
+findMax([H|T]) -> findMax(H, T).
+findMax(M, []) -> M;
+findMax(M, [H|L]) when M > H -> findMax(M, L);
+%Will fall through here if M > H
+findMax(_M, [H|L]) -> findMax(H,L).
+
+isPrime(N) when N rem 2 == 0 -> false;
+isPrime(N) -> isPrime(N,3).	 %3 is the first possible divisor	  
+
+isPrime(N,Divisor) when N == Divisor -> true;
+isPrime(N,Divisor) when N rem Divisor == 0 -> false;    
+isPrime(N,Divisor) -> isPrime(N,Divisor+2).  	 
