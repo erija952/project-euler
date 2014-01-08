@@ -8,7 +8,7 @@ public class PathCounter {
 
 	public static void main(String[] args) throws IOException {
 		PathCounter p = new PathCounter();
-		p.load("p18.txt");
+		p.load("p67.txt");
 		int result = p.sum();
 		System.out.println("Max path length was " + result);
 		
@@ -37,7 +37,7 @@ public class PathCounter {
 
 	public int sum() {
 		int nrLines = matrix.size();
-		System.out.println("nrlines " + nrLines);
+//		System.out.println("nrlines " + nrLines);
 		for(int lineNr = nrLines-2; lineNr >= 0; lineNr--) { //Lines are zero indexed in matrix
 			
 			int[] lineArray = matrix.get(lineNr);
@@ -49,11 +49,11 @@ public class PathCounter {
 			}
 			matrix.set(lineNr, lineArray);
 			
-			for(int j = 0; j < nrLines -1; j++) {
-				System.out.println();
-				int[] line = matrix.get(j);
-				System.out.println(Arrays.toString(line));
-			}
+//			for(int j = 0; j < nrLines -1; j++) {
+//				System.out.println();
+//				int[] line = matrix.get(j);
+//				System.out.println(Arrays.toString(line));
+//			}
 		}
 		
 		return matrix.get(0)[0];
