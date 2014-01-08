@@ -17,9 +17,9 @@ public class Converter {
 		singleMap.put(6, "six");
 		singleMap.put(7, "seven");
 		singleMap.put(8, "eight");
-		singleMap.put(9, "nine");	
-		singleMap.put(10, "ten");
+		singleMap.put(9, "nine");
 		
+		teensMap.put(10, "ten");		
 		teensMap.put(11, "eleven");
 		teensMap.put(12, "twelve");
 		teensMap.put(13, "thirteen");
@@ -32,7 +32,7 @@ public class Converter {
 		
 		tensMap.put(20, "twenty");
 		tensMap.put(30, "thirty");
-		tensMap.put(40, "fourty");
+		tensMap.put(40, "forty");
 		tensMap.put(50, "fifty");
 		tensMap.put(60, "sixty");
 		tensMap.put(70, "seventy");
@@ -40,23 +40,65 @@ public class Converter {
 		tensMap.put(90, "ninety");
 	}
 		
-	public Object convert(int num) {
-		
+	public String convert(int num) {
+
+		int modnum = 0;
 		int ones = num % 10;
 		int tens = (num -ones) % 100;
-		int hundreds = (num -tens -ones) % 1000;
-		int thousands = (num - hundreds - tens -ones) % 10000;
-		System.out.println("num " + num);
-		System.out.println("ones " + ones + " tens " + tens + " hundreds " + hundreds + " thousands " + thousands);
+		int hundreds = (num -tens -ones) % 1000 / 100;
+		int thousands = (num - hundreds - tens -ones) % 10000 / 1000;
 
-		if(num > 10  ) {
-			return teensMap.get(num);
+		String nr = "";
+		
+		if(thousands > 0) {
+			nr += singleMap.get(thousands);
+			nr += " thousand";
 		}
-		else
+		
+		if(hundreds > 0) {
+			nr += singleMap.get(hundreds);
+			nr += " hundred";
+			if( tens > 0 || ones > 0) {
+				nr += " and ";
+			}
+		}				
+		
+		if(tens >= 20) {
+			nr += tensMap.get(tens);
+		} else 
+		if(tens == 10)
 		{
-			return singleMap.get(num);
+			modnum = num - hundreds*100;
+			nr += teensMap.get(modnum);
+		}	
+		
+		if(ones > 0  && tens != 10) {
+			nr += singleMap.get(ones);
 		}
-
+		
+		return nr;
 	}
 
+	public int count(String string) {
+		String myString = "";
+		myString  = string.replaceAll(" ", "");
+		return myString.length();
+	}
+
+	public int sum(int maxnum) {
+		int sum = 0;
+		for(int i = 1; i <= maxnum; i++) 
+		{
+			sum += count(convert(i));
+		}
+		return sum;
+	}
+
+	public static void main(String[] args) {
+		Converter c = new Converter();
+		int maxnum = 1000;
+		int result = c.sum(maxnum);
+		System.out.println("Sum of letters from 1 to " + maxnum + " was " + result);
+		
+	}
 }
