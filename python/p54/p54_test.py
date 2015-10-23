@@ -1,148 +1,134 @@
 #!/usr/bin/python
 import unittest
-import collections
+from collections import Counter
+from operator import itemgetter
+from itertools import groupby
 
-class Card:
-    RANKS = (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
-    SUITS = ('Spades', 'Diamonds', 'Hearts', 'Clubs')
+d = {'1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, \
+     '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 11, 'Q': 12, \
+     'K': 13, 'A': 14}
 
-    def __init__(self, rank, suit):
-        self._rank = rank
-        self._suit = suit
-    
-    def getRank(self):
-        return self._rank
-    
-    def getSuit(self):
-        return self._suit
-            
-    def __lt__(self, other):
-        return( self._rank < other.getRank() )
-    
-class Hand():
-    def __init__(self):
-        self.cards = []
-    def add(self, card):
-        self.cards.insert(0,card)
+def highest_card(cnt, rdHighest = 0):
+    return sorted(cnt.most_common(5)[rdHighest:])[-1][0]
 
-def find_highest(hand, position = 0):
-    maxcard = -1
-    vlist = []
-    for x in range(0, 5):
-        vlist.insert(0,hand.cards[x].getRank())
-    vlist.sort()
-    vlist = vlist[::-1]
-    return vlist[position]
+def has_pair(cnt):    
+    for k, v in cnt.iteritems():
+        if v == 2:
+            return k
+        else:
+            continue
 
-def has_pair(hand):
-    if find_highest(hand, 0) == find_highest(hand,1):
-        return find_highest(hand)
+def has_2pair(cnt):    
+    counter = 0;
+    num = 1;
+    if len(cnt) == 3:
+        for k, v in cnt.iteritems():
+            if v == 2:
+                num= num*k
+                counter = counter +1;
+                if counter == 2:
+                    return num
+            else:
+                continue
+
+def has_3oak(cnt):    
+    for k, v in cnt.iteritems():
+        if v == 3:
+            return k
+        else:
+            continue
+    return -1
+
+def has_4oak(cnt):    
+    for k, v in cnt.iteritems():
+        if v == 4:
+            return k
+        else:
+            continue
+
+def has_straight(vList):
+    sor = sorted(vList)
+    i = 0
+    while i <= 3:
+        if sor[i]+1 == sor[i+1]:
+            i= i+1
+        else:
+            return -1
+    return max(vList)
+
+def has_flush(cList):
+    if len(set(cList)) == 1:
+        return 1
     else:
         return -1
 
-def has_2pair(hand):
-    if find_highest(hand, 0) == find_highest(hand,1):
-        if find_highest(hand, 2) == find_highest(hand,3):
-            return find_highest(hand, 0) * find_highest(hand, 2)
+def has_fullhouse(cnt): 
+    print cnt
+    if has_3oak(cnt) > 0:
+        if has_pair(cnt) > 0:
+            return has_3oak(cnt) + has_pair(cnt)
+    return -1
+
+def has_straightflush(vList, cList):
+    if has_straight(vList) > 0:
+        if has_flush(cList) > 0:
+            return max(vList)
         else:
             return -1
     else:
         return -1
 
-def has_3oak(hand):
-    if find_highest(hand, 0) == find_highest(hand,1) == find_highest(hand,2):
-        return find_highest(hand, 0) * 3
+def determine_hand(vList,cList,cnt):
+    if has_straightflush(vList,cList) > 0:
+        return 10000000000*has_straightflush(vList,cList)
+    if has_4oak(cnt) > 0:
+        return 1000000000*has_4oak(cnt)+highest_card(cnt)
+    if has_fullhouse(cnt) > 0:
+        return 100000000*has_fullhouse(cnt)
+    if has_flush(cList) > 0:
+       return 10000000 + highest_card(cnt)
+    if has_straight(vList) > 0:
+       return has_straight(vList) * 1000000
+    if has_3oak(cnt) > 0:
+       return has_3oak(cnt) * 100000 + highest_card(cnt,1)
+    if has_2pair(cnt) > 0:
+        return has_2pair(cnt) * 1000 + highest_card(cnt,2)
+    if has_pair(cnt) > 0:
+        return has_pair(cnt) * 100 + highest_card(cnt,1)
     else:
-        return -1
+        return 10*highest_card(cnt) + highest_card(cnt,1)
 
-def determine_hand(hand):
-    if has_3oak(hand) > 0:
-        return 40000000 + has_3oak(hand) * 100000 + find_highest(hand,3)
-    if has_2pair(hand) > 0:
-        return 30000000 + has_2pair(hand) * 1000 + find_highest(hand,4)
-    if has_pair(hand) > 0:
-        return 20000000 + has_pair(hand) * 100000 + find_highest(hand,2)
-    else:
-        return 10000000 + find_highest(hand)
+def getvalue(cards):
+    vList = []
+    cList = []
+    for card in cards:
+        vList.extend([d[str(card[0])]])
+        cList.extend([str(card[1])])
+        
+    cnt = Counter()
+    for num in vList:
+        cnt[num] += 1
 
-def rep(xs,nums=2):
-   a = []
-   for i in list(xs):
-       if(list(xs).count(i)>=nums):
-           a.append(i)
-   if a:
-       return a[0]
-   else:
-       return -1
-
-
-
-#Todo: temporary!
-def make_hand(one, two, three, four, five):
-      c1 = Card(one, 'Spades')
-      c2 = Card(two, 'Spades')
-      c3 = Card(three, 'Spades')
-      c4 = Card(four, 'Spades')
-      c5 = Card(five, 'Spades')
-
-      hand = Hand()
-      hand.add(c1)
-      hand.add(c2)
-      hand.add(c3)
-      hand.add(c4)
-      hand.add(c5)
-      return hand
-
-class TestCards(unittest.TestCase):
-
-    def test_findhighest(self):
-         hand = make_hand(2,3,4,6,5)
-         self.assertEqual(find_highest(hand), 6)
-
-    def test_find2ndhighest(self):
-         hand = make_hand(2,3,4,6,5)
-         self.assertEqual(find_highest(hand,1), 5)
-
-    def test_find3rdhighest(self):
-         hand = make_hand(2,3,4,6,6)
-         self.assertEqual(find_highest(hand,2), 4)
-
-    def test_findhighest2(self):
-         hand = make_hand(7,3,4,6,5)
-         self.assertEqual(find_highest(hand), 7)
+    return determine_hand(vList,cList,cnt)
     
-    def test_getvaluesingle(self):
-         hand = make_hand(7,3,4,6,5)
-         self.assertEqual(determine_hand(hand), 10000007)
 
-    def test_getvaluepair(self):
-         hand = make_hand(7,7,4,6,5)
-         self.assertEqual(determine_hand(hand), 20000000 + 700000 + 6)
+def run():
+    file = open('p054_poker.txt', "r")
+    i = 0
+    h1wins = 0
+    for line in file.readlines():
+        hand = line[:14].split(' ')
+        hand2 = line[15:-1].split(' ')
 
-    def test_getvaluepair2(self):
-         hand = make_hand(8,9,6,6,5)
-         self.assertEqual(determine_hand(hand), 30000000 + 36000 + 9)
+        
+        h1 = getvalue(hand)
+        h2 = getvalue(hand2)
+        if(h1 > h2):
+            h1wins = h1wins + 1
 
-
-    def test_getvalue2pair(self):
-         hand = make_hand(7,7,6,6,5)
-         self.assertEqual(determine_hand(hand), 30000000 + 42000 + 5)
-
-    def test_get3oak(self):
-         hand = make_hand(7,7,7,6,5)
-         self.assertEqual(determine_hand(hand), 40000000 + 2100000 + 6)
-
-    def test_get3oa2(self):
-         hand = make_hand(7,3,2,2,2)
-         self.assertEqual(determine_hand(hand), 40000000 + 60000 + 7)
-
-if __name__ == '__main__':
-
-    lst = [2,3,3,4,5]
-    print lst[0] in lst[1:]
-    print lst[1] in lst[1:]
-    import collections
-    print collections.Counter(lst)
+        i = i+1
+    print 'h1 wins', h1wins, ' of ', i
 
 
-    unittest.main()
+run()
+
